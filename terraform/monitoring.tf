@@ -51,6 +51,13 @@ resource "aws_security_group" "monitoring" {
   }
 
   ingress {
+    from_port = 9090
+    to_port   = 9090
+    protocol  = "tcp"
+    self      = true
+  }
+
+  ingress {
     from_port       = 3000
     to_port         = 3000
     protocol        = "tcp"
@@ -166,19 +173,16 @@ resource "aws_lb_target_group" "grafana" {
   tags = { Name = "${var.project}-grafana-tg" }
 }
 
-# ---------- ALB Listener Rules ----------
+# ---------- ALB Listener for Grafana (port 3000) ----------
 
-resource "aws_lb_listener_rule" "grafana" {
-  listener_arn = aws_lb_listener.http.arn
-  priority     = 10
+resource "aws_lb_listener" "grafana" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 3000
+  protocol          = "HTTP"
 
-  action {
+  default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.grafana.arn
-  }
-
-  condition {
-    path_pattern { values = ["/grafana*"] }
   }
 }
 
@@ -196,7 +200,28 @@ resource "aws_ecs_service" "prometheus" {
     security_groups = [aws_security_group.monitoring.id]
   }
 
+  service_registries {
+    registry_arn = aws_service_discovery_service.prometheus.arn
+  }
+
   tags = { Name = "${var.project}-prometheus" }
+}
+
+resource "aws_service_discovery_service" "prometheus" {
+  name = "prometheus"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.main.id
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
 }
 
 resource "aws_ecs_service" "grafana" {
@@ -217,7 +242,7 @@ resource "aws_ecs_service" "grafana" {
     container_port   = 3000
   }
 
-  depends_on = [aws_lb_listener_rule.grafana]
+  depends_on = [aws_lb_listener.grafana]
 
   tags = { Name = "${var.project}-grafana" }
 }

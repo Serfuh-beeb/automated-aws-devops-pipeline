@@ -10,7 +10,7 @@ scrape_configs:
         type: "A"
         port: 8000
     metrics_path: /metrics
-    
+
   - job_name: "prometheus"
     static_configs:
       - targets: ["localhost:9090"]

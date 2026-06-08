@@ -31,7 +31,7 @@ output "github_actions_role_arn" {
 
 output "grafana_url" {
   description = "Grafana dashboard URL"
-  value       = "http://${aws_lb.main.dns_name}/grafana"
+  value       = "http://${aws_lb.main.dns_name}:3000"
 }
 
 output "prometheus_ecr" {

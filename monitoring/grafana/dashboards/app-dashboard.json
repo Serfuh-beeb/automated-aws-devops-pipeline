@@ -1,41 +1,45 @@
 {
-  "dashboard": {
-    "title": "Cloud-Native Task API",
-    "uid": "fastapi-dashboard",
-    "panels": [
-      {
-        "title": "HTTP Requests Total",
-        "type": "stat",
-        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
-        "targets": [{"expr": "http_requests_total", "legendFormat": "Total Requests"}],
-        "datasource": "Prometheus"
-      },
-      {
-        "title": "Request Rate (req/s)",
-        "type": "timeseries",
-        "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0},
-        "targets": [{"expr": "rate(http_requests_total[1m])", "legendFormat": "req/s"}],
-        "datasource": "Prometheus"
-      },
-      {
-        "title": "DB Latency (seconds)",
-        "type": "timeseries",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
-        "targets": [
-          {"expr": "rate(db_latency_seconds_sum[1m]) / rate(db_latency_seconds_count[1m])", "legendFormat": "Avg Latency"},
-          {"expr": "histogram_quantile(0.95, rate(db_latency_seconds_bucket[1m]))", "legendFormat": "P95 Latency"}
-        ],
-        "datasource": "Prometheus"
-      },
-      {
-        "title": "DB Queries Total",
-        "type": "stat",
-        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 8},
-        "targets": [{"expr": "db_latency_seconds_count", "legendFormat": "Total Queries"}],
-        "datasource": "Prometheus"
-      }
-    ],
-    "time": {"from": "now-15m", "to": "now"},
-    "refresh": "5s"
-  }
+  "title": "Cloud-Native Task API",
+  "uid": "fastapi-dashboard",
+  "editable": true,
+  "panels": [
+    {
+      "title": "HTTP Requests Total",
+      "type": "stat",
+      "id": 1,
+      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "http_requests_total", "legendFormat": "Total Requests"}],
+      "datasource": "Prometheus"
+    },
+    {
+      "title": "Request Rate (req/s)",
+      "type": "timeseries",
+      "id": 2,
+      "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0},
+      "targets": [{"expr": "rate(http_requests_total[1m])", "legendFormat": "req/s"}],
+      "datasource": "Prometheus"
+    },
+    {
+      "title": "DB Latency (seconds)",
+      "type": "timeseries",
+      "id": 3,
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [
+        {"expr": "rate(db_latency_seconds_sum[1m]) / rate(db_latency_seconds_count[1m])", "legendFormat": "Avg Latency"},
+        {"expr": "histogram_quantile(0.95, rate(db_latency_seconds_bucket[1m]))", "legendFormat": "P95 Latency"}
+      ],
+      "datasource": "Prometheus"
+    },
+    {
+      "title": "DB Queries Total",
+      "type": "stat",
+      "id": 4,
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 8},
+      "targets": [{"expr": "db_latency_seconds_count", "legendFormat": "Total Queries"}],
+      "datasource": "Prometheus"
+    }
+  ],
+  "time": {"from": "now-15m", "to": "now"},
+  "refresh": "5s",
+  "schemaVersion": 30
 }
