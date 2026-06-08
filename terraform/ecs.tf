@@ -64,6 +64,10 @@ resource "aws_ecs_service" "app" {
     container_port   = var.container_port
   }
 
+  service_registries {
+    registry_arn = aws_service_discovery_service.app.arn
+  }
+
   depends_on = [aws_lb_listener.http]
 
   tags = { Name = "${var.project}-service" }

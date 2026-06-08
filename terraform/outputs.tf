@@ -27,3 +27,19 @@ output "github_actions_role_arn" {
   description = "IAM role ARN for GitHub Actions OIDC"
   value       = aws_iam_role.github_actions.arn
 }
+
+
+output "grafana_url" {
+  description = "Grafana dashboard URL"
+  value       = "http://${aws_lb.main.dns_name}/grafana"
+}
+
+output "prometheus_ecr" {
+  description = "Prometheus ECR repo URL"
+  value       = aws_ecr_repository.prometheus.repository_url
+}
+
+output "grafana_ecr" {
+  description = "Grafana ECR repo URL"
+  value       = aws_ecr_repository.grafana.repository_url
+}
