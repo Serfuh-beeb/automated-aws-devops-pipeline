@@ -1,0 +1,83 @@
+graph TB
+    subgraph INTERNET["☁️ Internet"]
+        USER["👤 User"]
+    end
+
+    subgraph AWS["AWS Cloud (us-east-1)"]
+        subgraph VPC["VPC 10.0.0.0/16"]
+            subgraph PUB_AZ1["Public Subnet - AZ1<br/>10.0.1.0/24"]
+                ALB["Application<br/>Load Balancer"]
+                NAT1["NAT Gateway"]
+            end
+            subgraph PUB_AZ2["Public Subnet - AZ2<br/>10.0.2.0/24"]
+                ALB2["ALB Node"]
+                NAT2["NAT Gateway"]
+            end
+            subgraph PRIV_AZ1["Private Subnet - AZ1<br/>10.0.10.0/24"]
+                ECS1["ECS Fargate<br/>Task 1<br/>🐳 FastAPI"]
+            end
+            subgraph PRIV_AZ2["Private Subnet - AZ2<br/>10.0.20.0/24"]
+                ECS2["ECS Fargate<br/>Task 2<br/>🐳 FastAPI"]
+            end
+            subgraph DB_AZ1["Private DB Subnet - AZ1<br/>10.0.100.0/24"]
+                RDS1["Amazon RDS<br/>PostgreSQL<br/>(Primary)"]
+            end
+            subgraph DB_AZ2["Private DB Subnet - AZ2<br/>10.0.200.0/24"]
+                RDS2["RDS<br/>(Standby)"]
+            end
+            IGW["Internet<br/>Gateway"]
+        end
+
+        ECR["Amazon ECR<br/>Container Registry"]
+        S3["S3 Bucket<br/>Terraform State"]
+        DYNAMO["DynamoDB<br/>State Lock"]
+        CW["CloudWatch<br/>Logs"]
+    end
+
+    subgraph CICD["GitHub"]
+        GH["GitHub Actions<br/>CI/CD Pipeline"]
+    end
+
+    subgraph MONITORING["Monitoring"]
+        PROM["Prometheus"]
+        GRAF["Grafana"]
+    end
+
+    USER -->|HTTPS| IGW
+    IGW --> ALB
+    ALB -->|Port 8000| ECS1
+    ALB -->|Port 8000| ECS2
+    ECS1 -->|Port 5432| RDS1
+    ECS2 -->|Port 5432| RDS1
+    RDS1 ---|Replication| RDS2
+    ECS1 --> NAT1
+    ECS2 --> NAT2
+    NAT1 --> IGW
+    NAT2 --> IGW
+
+    GH -->|Push Image| ECR
+    GH -->|terraform apply| AWS
+    GH -->|OIDC Auth| AWS
+    ECR -->|Pull Image| ECS1
+    ECR -->|Pull Image| ECS2
+
+    ECS1 -->|/metrics| PROM
+    ECS2 -->|/metrics| PROM
+    PROM --> GRAF
+
+    ECS1 --> CW
+    ECS2 --> CW
+
+    classDef public fill:#ff9900,stroke:#232f3e,color:#fff
+    classDef private fill:#3b48cc,stroke:#232f3e,color:#fff
+    classDef db fill:#3b48cc,stroke:#c7131a,color:#fff
+    classDef aws fill:#232f3e,stroke:#ff9900,color:#fff
+    classDef cicd fill:#24292e,stroke:#fff,color:#fff
+    classDef mon fill:#e6522c,stroke:#232f3e,color:#fff
+
+    class ALB,ALB2,NAT1,NAT2,IGW public
+    class ECS1,ECS2 private
+    class RDS1,RDS2 db
+    class ECR,S3,DYNAMO,CW aws
+    class GH cicd
+    class PROM,GRAF mon

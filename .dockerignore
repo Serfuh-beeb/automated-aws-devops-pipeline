@@ -1,0 +1,13 @@
+.venv
+.idea
+.git
+.terraform
+__pycache__
+*.pyc
+*.db
+docs
+terraform
+.github
+.gitignore
+.dockerignore
+README.md

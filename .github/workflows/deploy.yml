@@ -1,0 +1,61 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO: 535387297463.dkr.ecr.us-east-1.amazonaws.com/devops-project-api
+  ECS_CLUSTER: devops-project-cluster
+  ECS_SERVICE: devops-project-service
+  TASK_FAMILY: devops-project-task
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::535387297463:role/devops-project-github-actions
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image
+        id: build
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker build -t $ECR_REPO:$IMAGE_TAG -t $ECR_REPO:latest .
+          docker push $ECR_REPO:$IMAGE_TAG
+          docker push $ECR_REPO:latest
+          echo "image=$ECR_REPO:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Update ECS task definition
+        id: task-def
+        run: |
+          TASK_DEF=$(aws ecs describe-task-definition --task-definition $TASK_FAMILY --query taskDefinition)
+          NEW_TASK_DEF=$(echo $TASK_DEF | jq --arg IMAGE "${{ steps.build.outputs.image }}" \
+            '.containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+          echo $NEW_TASK_DEF > task-def.json
+          NEW_ARN=$(aws ecs register-task-definition --cli-input-json file://task-def.json --query taskDefinition.taskDefinitionArn --output text)
+          echo "arn=$NEW_ARN" >> $GITHUB_OUTPUT
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --task-definition ${{ steps.task-def.outputs.arn }} \
+            --force-new-deployment
+          echo "🚀 Deployed ${{ steps.build.outputs.image }}"
