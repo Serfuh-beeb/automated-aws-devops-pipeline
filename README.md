@@ -4,7 +4,7 @@ A fully automated DevOps pipeline demonstrating Infrastructure as Code, CI/CD, a
 
 ## Architecture
 
-![Architecture Diagram](docs/architecture.png)
+![Architecture Diagram](docs/architecture.drawio.svg)
 
 | Layer | Components |
 |-------|-----------|
@@ -110,12 +110,6 @@ Every push to `main` triggers:
   - DB Query Count
 - Zero manual configuration on scale/redeploy
 
-## Authors
+## License
 
-- Sami Bassam AbuAysheh
-- Rashed Monther Altamimi
-- Mazen Maher Mansi
-
-**Supervisors:** Dr. Huthaifa Al Issa, Dr. Ala'eddin Masadeh
-
-Al-Balqa Applied University — Electrical Engineering Department
+This project was developed as a graduation project at Al-Balqa Applied University.
