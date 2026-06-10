@@ -76,7 +76,7 @@ variable "db_name" {
 
 variable "github_repo" {
   description = "GitHub repo in format owner/repo"
-  default     = "Serfuh-beeb/aws-devops-project"
+  default     = "Serfuh-beeb/automated-aws-devops-pipeline"
 }
 
 data "aws_availability_zones" "available" {
