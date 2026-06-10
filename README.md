@@ -109,7 +109,3 @@ Every push to `main` triggers:
   - Database Latency (avg + P95)
   - DB Query Count
 - Zero manual configuration on scale/redeploy
-
-## License
-
-This project was developed as a graduation project at Al-Balqa Applied University.
